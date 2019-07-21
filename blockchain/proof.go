@@ -21,7 +21,7 @@ import (
 // Requirements:
 // The First few bytes must contain 0s
 
-const Difficulty = 12
+const Difficulty = 18
 
 type ProofOfWork struct {
 	Block  *Block
@@ -42,8 +42,8 @@ func (pow *ProofOfWork) InitData(nonce int) []byte {
 		[][]byte{
 			pow.Block.PrevHash,
 			pow.Block.Data,
-			ToHex(int64(nonce)),
-			ToHex(int64(Difficulty)),
+			ToBytes(int64(nonce)),
+			ToBytes(int64(Difficulty)),
 		},
 		[]byte{},
 	)
@@ -87,7 +87,7 @@ func (pow *ProofOfWork) Validate() bool {
 	return intHash.Cmp(pow.Target) == -1
 }
 
-func ToHex(num int64) []byte {
+func ToBytes(num int64) []byte {
 	buff := new(bytes.Buffer)
 	err := binary.Write(buff, binary.BigEndian, num)
 	if err != nil {
