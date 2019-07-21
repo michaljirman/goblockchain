@@ -31,7 +31,7 @@ func InitBlockChain() *BlockChain {
 	HandleError(errors.Wrap(err, ""))
 
 	err = db.Update(func(txn *badger.Txn) error {
-		if _, err := txn.Get([]byte(lastHashKey)); err == badger.ErrKeyNotFound {
+		if _, err := txn.Get([]byte(lastHash)); err == badger.ErrKeyNotFound {
 			fmt.Println("aaaa")
 			log.Warn().Err(err).Msgf("No existing blockchain found")
 			genesis := Genesis()
@@ -42,7 +42,7 @@ func InitBlockChain() *BlockChain {
 			lastHash = genesis.Hash
 			return err
 		} else {
-			item, err := txn.Get([]byte(lastHashKey))
+			item, err := txn.Get([]byte(lastHash))
 			HandleError(errors.Wrap(err, "failed to get value"))
 			err = item.Value(func(val []byte) error {
 				lastHash = append([]byte{}, val...)

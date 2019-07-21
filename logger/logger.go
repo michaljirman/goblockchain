@@ -1,7 +1,10 @@
 package logger
 
 import (
+	"fmt"
 	"os"
+	"runtime/debug"
+	"time"
 
 	"github.com/rs/zerolog/pkgerrors"
 
@@ -12,9 +15,6 @@ import (
 )
 
 func SetupLogger(cfg *config.LogConf) error {
-	zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack
-	zerolog.TimeFieldFormat = ""
-
 	level, err := zerolog.ParseLevel(cfg.Level)
 	if err != nil {
 		log.Error().Err(err).Msg("error returned when parsing log level")
@@ -22,10 +22,16 @@ func SetupLogger(cfg *config.LogConf) error {
 	}
 	zerolog.SetGlobalLevel(level)
 
-	if cfg.Pretty {
-		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout}).With().Timestamp().Caller().Logger()
+	if cfg.DevelopmentLogger {
+		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339}).With().Timestamp().Caller().Logger()
+		zerolog.ErrorStackMarshaler = func(err error) interface{} {
+			fmt.Println(string(debug.Stack()))
+			return nil
+		}
 	} else {
+		zerolog.TimeFieldFormat = ""
 		log.Logger = zerolog.New(os.Stdout).With().Timestamp().Caller().Logger()
+		zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack
 	}
 	return nil
 }

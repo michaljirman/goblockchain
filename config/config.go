@@ -11,8 +11,8 @@ type Config struct {
 
 // LogConf - logging configuration struct
 type LogConf struct {
-	Level  string `env:"LOG_LEVEL" envDefault:"debug"`
-	Pretty bool   `env:"PRETTY_LOGGING" envDefault:"FALSE"`
+	Level             string `env:"LOG_LEVEL" envDefault:"debug"`
+	DevelopmentLogger bool   `env:"DEVELOPMENT_LOGGER" envDefault:"FALSE"`
 }
 
 func GetConfigFromEnv() (Config, error) {
