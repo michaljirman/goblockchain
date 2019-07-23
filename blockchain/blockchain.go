@@ -49,7 +49,7 @@ func ContinueBlockChain(address string) *BlockChain {
 	HandleError(err)
 
 	err = db.Update(func(txn *badger.Txn) error {
-		item, err := txn.Get([]byte(lastHash))
+		item, err := txn.Get([]byte(lastHashKey))
 		HandleError(err)
 		err = item.Value(func(val []byte) error {
 			lastHash = append([]byte{}, val...)
@@ -90,7 +90,7 @@ func InitBlockChain(address string) *BlockChain {
 }
 
 // Adds a new block into the BlockChain DB.
-func (chain *BlockChain) AddBlock(data string) {
+func (chain *BlockChain) AddBlock(transactions []*Transaction) {
 	var lastHash []byte
 
 	err := chain.Database.View(func(txn *badger.Txn) error {
@@ -104,7 +104,7 @@ func (chain *BlockChain) AddBlock(data string) {
 	})
 	HandleError(errors.Wrap(err, ""))
 
-	newBlock := CreateBlock(data, lastHash)
+	newBlock := CreateBlock(transactions, lastHash)
 
 	err = chain.Database.Update(func(txn *badger.Txn) error {
 		err := txn.Set(newBlock.Hash, newBlock.Serialize())
@@ -157,6 +157,10 @@ func (iter *BlockChainIterator) Next() *Block {
 // A exchanges 100 amount for cash => TxOutput of 100 amount created to an A address
 // A paying 10 amount to B => a new Tx created where previous TxOutput (100) is used as TxInput and 10 amount used as an TxOutput
 // A's payment to B's account uses a previous transaction's output as its input.
+
+//      Inputs          Outputs
+//TX0     0               100
+//TX1     100              10
 func (chain *BlockChain) FindUnspentTransactions(address string) []Transaction {
 	var unspentTxs []Transaction
 	spentTXOs := make(map[string][]int)
@@ -196,4 +200,44 @@ func (chain *BlockChain) FindUnspentTransactions(address string) []Transaction {
 		}
 	}
 	return unspentTxs
+}
+
+// Finds all unspent transactions outputs.
+func (chain *BlockChain) FindUTXO(address string) []TxOutput {
+	var UTXOs []TxOutput
+	unspentTransactions := chain.FindUnspentTransactions(address)
+
+	for _, tx := range unspentTransactions {
+		for _, out := range tx.Outputs {
+			if out.CanBeUnlocked(address) {
+				UTXOs = append(UTXOs, out)
+			}
+		}
+	}
+	return UTXOs
+}
+
+// Finds all unspent tokens which can be used as an spendable outputs.
+func (chain *BlockChain) FindSpendableOutputs(address string, amount int) (int, map[string][]int) {
+	unspentOuts := make(map[string][]int)
+	unspentTxs := chain.FindUnspentTransactions(address)
+	accumulated := 0
+
+Work:
+	for _, tx := range unspentTxs {
+		txID := hex.EncodeToString(tx.ID)
+
+		for outIdx, out := range tx.Outputs {
+			if out.CanBeUnlocked(address) && accumulated < amount {
+				accumulated += out.Value
+				unspentOuts[txID] = append(unspentOuts[txID], outIdx)
+
+				if accumulated >= amount {
+					break Work
+				}
+			}
+		}
+	}
+
+	return accumulated, unspentOuts
 }
