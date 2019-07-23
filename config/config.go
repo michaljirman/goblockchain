@@ -5,16 +5,18 @@ import (
 	"github.com/pkg/errors"
 )
 
+// Global configuration struct.
 type Config struct {
 	Log LogConf
 }
 
-// LogConf - logging configuration struct
+// LogConf - logging configuration struct.
 type LogConf struct {
 	Level             string `env:"LOG_LEVEL" envDefault:"debug"`
 	DevelopmentLogger bool   `env:"DEVELOPMENT_LOGGER" envDefault:"FALSE"`
 }
 
+// Gets a configuration struct from an environment.
 func GetConfigFromEnv() (Config, error) {
 	config := Config{}
 

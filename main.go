@@ -18,12 +18,14 @@ type CommandLine struct {
 	blockchain *blockchain.BlockChain
 }
 
+// Prints a help usage message.
 func (cli *CommandLine) printUsage() {
 	fmt.Println("Usage:")
 	fmt.Println(" add -block BLOCK_DATA - add a block to the chain")
 	fmt.Println(" print - Prints the blocks in the chain")
 }
 
+// Validates command line arguments.
 func (cli *CommandLine) validateArgs() {
 	if len(os.Args) < 2 {
 		cli.printUsage()
@@ -31,11 +33,13 @@ func (cli *CommandLine) validateArgs() {
 	}
 }
 
+// Performs an addBlock command line action.
 func (cli *CommandLine) addBlock(data string) {
 	cli.blockchain.AddBlock(data)
 	log.Info().Msg("a new block added")
 }
 
+// Performs a printChain command line action.
 func (cli *CommandLine) printChain() {
 	iter := cli.blockchain.Iterator()
 	for {
@@ -54,6 +58,7 @@ func (cli *CommandLine) printChain() {
 	}
 }
 
+// Runs command line tool.
 func (cli *CommandLine) run() {
 	cli.validateArgs()
 	addBlockCmd := flag.NewFlagSet("add", flag.ExitOnError)
@@ -85,7 +90,9 @@ func (cli *CommandLine) run() {
 	}
 }
 
-//PRETTY_LOGGING=TRUE go run main.go
+// Main entry point of the program.
+// Examples:
+// PRETTY_LOGGING=TRUE go run main.go
 func main() {
 	cfg, err := config.GetConfigFromEnv()
 	if err != nil {
