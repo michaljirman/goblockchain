@@ -15,13 +15,18 @@ github.com/dgryski/go-farm
 github.com/dustin/go-humanize
 # github.com/golang/protobuf v1.3.1
 github.com/golang/protobuf/proto
+# github.com/mr-tron/base58 v1.1.2
+github.com/mr-tron/base58
 # github.com/pkg/errors v0.8.1
 github.com/pkg/errors
 # github.com/rs/zerolog v1.14.3
-github.com/rs/zerolog
 github.com/rs/zerolog/log
+github.com/rs/zerolog
+github.com/rs/zerolog/pkgerrors
 github.com/rs/zerolog/internal/cbor
 github.com/rs/zerolog/internal/json
+# golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2
+golang.org/x/crypto/ripemd160
 # golang.org/x/net v0.0.0-20190620200207-3b0461eec859
 golang.org/x/net/trace
 golang.org/x/net/internal/timeseries
